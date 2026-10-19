@@ -1,0 +1,33 @@
+TEST SET (233 images) - best.pt
+
+11-class results:
+  class           IoU    Dice
+  Sky          0.9203  0.9585
+  Building     0.8313  0.9079
+  Pole         0.3182  0.4828
+  Road         0.9396  0.9688
+  Pavement     0.8079  0.8937
+  Tree         0.7625  0.8653
+  SignSymbol   0.4428  0.6138
+  Fence        0.4425  0.6135
+  Car          0.7983  0.8878
+  Pedestrian   0.5550  0.7139
+  Bicyclist    0.5803  0.7344
+  MEAN         0.6726  0.7855
+  pixel accuracy: 0.9127
+
+3-class navigation results (Drivable / Obstacle / Other):
+  group           IoU    Dice
+  Drivable     0.9396  0.9688
+  Obstacle     0.9469  0.9727
+  Other        0.8786  0.9354
+  MEAN         0.9217  0.9590
+  pixel accuracy: 0.9615
+
+Navigation safety:
+  obstacle pixels predicted as drivable: 0.42%
+  drivable pixels predicted as obstacle: 0.48%
+  dynamic obstacles predicted as Road:
+    Car         4.23%
+    Pedestrian  0.23%
+    Bicyclist   0.63%
