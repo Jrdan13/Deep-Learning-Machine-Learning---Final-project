@@ -1,0 +1,11 @@
+{
+  "name": "base_s1",
+  "aug": "none",
+  "loss": "ce",
+  "class_weights": false,
+  "epochs": 40,
+  "bs": 4,
+  "workers": 2,
+  "seed": 1,
+  "resume": false
+}

@@ -1,0 +1,14 @@
+Run aug (aug=strong, loss=ce, class weights=False, seed=0)
+best val mIoU 0.7100 at epoch 37
+mean val mIoU over the last 5 epochs 0.7059
+  Sky         IoU 0.9431  Dice 0.9707
+  Building    IoU 0.8980  Dice 0.9463
+  Pole        IoU 0.0642  Dice 0.1207
+  Road        IoU 0.9702  Dice 0.9849
+  Pavement    IoU 0.8773  Dice 0.9346
+  Tree        IoU 0.9131  Dice 0.9546
+  SignSymbol  IoU 0.5345  Dice 0.6966
+  Fence       IoU 0.6552  Dice 0.7917
+  Car         IoU 0.8543  Dice 0.9214
+  Pedestrian  IoU 0.4229  Dice 0.5944
+  Bicyclist   IoU 0.6768  Dice 0.8073

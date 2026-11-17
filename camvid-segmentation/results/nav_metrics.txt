@@ -1,0 +1,27 @@
+NAVIGATION METRICS (test set, best.pt)
+
+Whole image:
+  obstacle called drivable:            0.42%
+  other (pavement/sky) called drivable: 2.49%
+  drivable called not-drivable:         2.99%
+  pixels called drivable that are not:  3.24%
+  drivable IoU:                         0.9396
+
+Inside driving ROI:
+  obstacle called drivable:            5.29%
+  other (pavement/sky) called drivable: 9.67%
+  drivable called not-drivable:         1.44%
+  pixels called drivable that are not:  2.48%
+  drivable IoU:                         0.9615
+
+Pavement called Road: whole image 7.06% | ROI 9.85%
+
+Car called Road (whole image): 4.23%
+Mean brightness (0-1): all test images 0.389 | worst 6 images 0.233
+Worst images (index: car->road pixels / car pixels, brightness):
+  #27: 4165 / 26960, 0.233
+  #28: 4157 / 26823, 0.233
+  #25: 4007 / 26752, 0.232
+  #29: 3983 / 26630, 0.233
+  #22: 3943 / 28048, 0.230
+  #31: 3937 / 25323, 0.236

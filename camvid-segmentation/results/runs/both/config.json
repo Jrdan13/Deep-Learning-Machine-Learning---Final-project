@@ -1,0 +1,11 @@
+{
+  "name": "both",
+  "aug": "strong",
+  "loss": "ce_dice",
+  "class_weights": false,
+  "epochs": 40,
+  "bs": 4,
+  "workers": 2,
+  "seed": 0,
+  "resume": false
+}

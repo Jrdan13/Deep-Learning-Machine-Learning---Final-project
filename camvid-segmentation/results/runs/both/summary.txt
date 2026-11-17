@@ -1,0 +1,14 @@
+Run both (aug=strong, loss=ce_dice, class weights=False, seed=0)
+best val mIoU 0.7564 at epoch 35
+mean val mIoU over the last 5 epochs 0.7539
+  Sky         IoU 0.9402  Dice 0.9692
+  Building    IoU 0.9057  Dice 0.9505
+  Pole        IoU 0.1607  Dice 0.2770
+  Road        IoU 0.9677  Dice 0.9836
+  Pavement    IoU 0.8760  Dice 0.9339
+  Tree        IoU 0.9102  Dice 0.9530
+  SignSymbol  IoU 0.5915  Dice 0.7433
+  Fence       IoU 0.6896  Dice 0.8163
+  Car         IoU 0.8364  Dice 0.9109
+  Pedestrian  IoU 0.6006  Dice 0.7505
+  Bicyclist   IoU 0.8422  Dice 0.9144

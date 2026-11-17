@@ -1,0 +1,11 @@
+  Sky         IoU 0.9213  Dice 0.9590
+  Building    IoU 0.8162  Dice 0.8988
+  Pole        IoU 0.2182  Dice 0.3583
+  Road        IoU 0.9439  Dice 0.9711
+  Pavement    IoU 0.8045  Dice 0.8916
+  Tree        IoU 0.7544  Dice 0.8600
+  SignSymbol  IoU 0.4181  Dice 0.5896
+  Fence       IoU 0.3173  Dice 0.4818
+  Car         IoU 0.8335  Dice 0.9092
+  Pedestrian  IoU 0.4703  Dice 0.6397
+  Bicyclist   IoU 0.4467  Dice 0.6176
