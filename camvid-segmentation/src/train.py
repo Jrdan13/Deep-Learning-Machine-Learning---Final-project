@@ -72,6 +72,7 @@ def main():
     ap.add_argument("--bs", type=int, default=4)
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--arch", choices=["unet", "fcn", "deeplabv3plus"], default="unet")
     ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
 
@@ -95,7 +96,7 @@ def main():
     val_dl = DataLoader(CamVidDataset(DATA, "val"), args.bs, shuffle=False,
                         num_workers=args.workers, pin_memory=True)
 
-    model = build_model().to(device)
+    model = build_model(args.arch).to(device)
     w = class_weights().to(device) if args.class_weights else None
     ce = nn.CrossEntropyLoss(weight=w, ignore_index=VOID)
     dice_loss = smp.losses.DiceLoss("multiclass", ignore_index=VOID)

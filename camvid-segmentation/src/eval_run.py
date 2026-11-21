@@ -36,7 +36,10 @@ def main():
     name = ap.parse_args().name
 
     dev = torch.device("cuda")
-    model = build_model(pretrained=False).to(dev)
+    cfg_path = RUNS / name / "config.json"
+    cfg = (json.loads(cfg_path.read_text()) if cfg_path.exists()
+           else {"aug": "mild", "loss": "ce_dice", "class_weights": True})
+    model = build_model(cfg.get("arch", "unet"), pretrained=False).to(dev)
     model.load_state_dict(torch.load(CKPT / name / "best.pt", map_location=dev))
     model.eval()
     dl = DataLoader(CamVidDataset(DATA, "test"), 4, shuffle=False, num_workers=0)
