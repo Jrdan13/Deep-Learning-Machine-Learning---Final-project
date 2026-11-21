@@ -1,3 +1,7 @@
+"""Test-set evaluation of one run: 11-class and 3-group metrics, safety numbers, qualitative figure.
+Usage: python src\\evaluate.py <run name>      (default: both)"""
+import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +18,11 @@ CKPT = ROOT / "checkpoints"
 OUT = ROOT / "results"
 FIG = OUT / "figures"
 N = NUM_CLASSES
+
+# Run name from the command line; the architecture is read from the run's config.json.
+NAME = sys.argv[1] if len(sys.argv) > 1 else "both"
+_cfg = OUT / "runs" / NAME / "config.json"
+ARCH = json.loads(_cfg.read_text()).get("arch", "unet") if _cfg.exists() else "unet"
 
 # Navigation grouping: 0 = Drivable, 1 = Obstacle, 2 = Other (non-drivable, non-obstacle)
 GROUP = np.full(N, 1)
@@ -42,8 +51,8 @@ def metrics(conf):
 
 def main():
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(pretrained=False).to(dev)
-    model.load_state_dict(torch.load(CKPT / "best.pt", map_location=dev))
+    model = build_model(ARCH, pretrained=False).to(dev)
+    model.load_state_dict(torch.load(CKPT / NAME / "best.pt", map_location=dev))
     model.eval()
 
     ds = CamVidDataset(DATA, "test")
@@ -58,7 +67,7 @@ def main():
             conf += torch.bincount(y[keep] * N + pred[keep], minlength=N * N)
     conf = conf.view(N, N).cpu().numpy()  # rows = ground truth, cols = prediction
 
-    lines = [f"TEST SET ({len(ds)} images) - best.pt", ""]
+    lines = [f"TEST SET ({len(ds)} images) - run {NAME} ({ARCH}, best.pt)", ""]
     iou, dice, acc = metrics(conf)
     lines += ["11-class results:", f"  {'class':<11} {'IoU':>7} {'Dice':>7}"]
     lines += [f"  {n:<11} {i:7.4f} {d:7.4f}" for n, i, d in zip(CLASSES, iou, dice)]
@@ -85,9 +94,10 @@ def main():
 
     text = "\n".join(lines)
     print(text)
-    OUT.mkdir(exist_ok=True)
+    run_dir = OUT / "runs" / NAME
+    run_dir.mkdir(parents=True, exist_ok=True)
     FIG.mkdir(parents=True, exist_ok=True)
-    (OUT / "test_metrics.txt").write_text(text, encoding="utf-8")
+    (run_dir / "test_metrics.txt").write_text(text, encoding="utf-8")
 
     # Qualitative figure
     idxs = np.linspace(0, len(ds) - 1, 6, dtype=int)
@@ -107,9 +117,9 @@ def main():
             if r == 0:
                 axes[r, c].set_title(titles[c])
     plt.tight_layout()
-    path = FIG / "test_predictions.png"
+    path = FIG / f"test_predictions_{NAME}.png"
     plt.savefig(path, dpi=130)
-    print("\nSaved", path, "and", OUT / "test_metrics.txt")
+    print("\nSaved", path, "and", run_dir / "test_metrics.txt")
 
 
 if __name__ == "__main__":

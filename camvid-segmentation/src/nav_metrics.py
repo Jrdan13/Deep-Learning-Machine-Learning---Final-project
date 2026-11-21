@@ -1,5 +1,5 @@
-from pathlib import Path
-
+"""Navigation metrics of one run on the test set: driving-corridor (ROI) errors, car-called-road
+figure and ROI check figure. Usage: python src\\nav_metrics.py <run name>      (default: both)"""
 import cv2
 import numpy as np
 import torch
@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from dataset import CamVidDataset, CLASSES, VOID, MEAN, STD
 from model import build_model
-from evaluate import GROUP, PALETTE, H0, DATA, CKPT, OUT, FIG
+from evaluate import GROUP, PALETTE, H0, DATA, CKPT, OUT, FIG, NAME, ARCH
 
 ROAD, PAVE, CAR = 3, 4, 8
 H, W = 384, 480
@@ -37,8 +37,8 @@ def report(name, c):
 @torch.no_grad()
 def main():
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(pretrained=False).to(dev)
-    model.load_state_dict(torch.load(CKPT / "best.pt", map_location=dev))
+    model = build_model(ARCH, pretrained=False).to(dev)
+    model.load_state_dict(torch.load(CKPT / NAME / "best.pt", map_location=dev))
     model.eval()
 
     ds = CamVidDataset(DATA, "test")
@@ -68,7 +68,7 @@ def main():
         pf[2] += (pv & roi_t).sum().item(); pf[3] += (pv & pr & roi_t).sum().item()
 
     car_err, car_tot, bright = np.array(car_err), np.array(car_tot), np.array(bright)
-    lines = ["NAVIGATION METRICS (test set, best.pt)", ""]
+    lines = [f"NAVIGATION METRICS (test set, run {NAME}, {ARCH}, best.pt)", ""]
     lines += report("Whole image:", full.cpu().numpy().reshape(3, 3)) + [""]
     lines += report("Inside driving ROI:", inroi.cpu().numpy().reshape(3, 3)) + [""]
     lines += [f"Pavement called Road: whole image {100 * pf[1] / max(pf[0], 1):.2f}% | "
@@ -80,7 +80,10 @@ def main():
     lines += [f"  #{i}: {car_err[i]} / {car_tot[i]}, {bright[i]:.3f}" for i in top]
     text = "\n".join(lines)
     print(text)
-    (OUT / "nav_metrics.txt").write_text(text, encoding="utf-8")
+    run_dir = OUT / "runs" / NAME
+    run_dir.mkdir(parents=True, exist_ok=True)
+    FIG.mkdir(parents=True, exist_ok=True)
+    (run_dir / "nav_metrics.txt").write_text(text, encoding="utf-8")
 
     # Figure 1: worst Car->Road images (red = car pixels predicted as road)
     fig, axes = plt.subplots(len(top), 4, figsize=(14, 2.6 * len(top)))
@@ -96,7 +99,7 @@ def main():
         for c, panel in enumerate([img, PALETTE[gt], PALETTE[p], over]):
             axes[r, c].imshow(panel[:H0]); axes[r, c].axis("off")
         axes[r, 0].text(6, 28, f"#{i}", color="white", fontsize=10, bbox=dict(fc="black", alpha=0.6))
-    plt.tight_layout(); plt.savefig(FIG / "car_as_road.png", dpi=120); plt.close()
+    plt.tight_layout(); plt.savefig(FIG / f"car_as_road_{NAME}.png", dpi=120); plt.close()
 
     # Figure 2: where the ROI sits
     fig, axs = plt.subplots(1, 2, figsize=(10, 4))
@@ -105,7 +108,7 @@ def main():
         img = (x.permute(1, 2, 0).numpy() * np.array(STD) + np.array(MEAN)).clip(0, 1)
         a.imshow(img[:H0]); a.add_patch(plt.Polygon(pts, fill=False, ec="yellow", lw=2)); a.axis("off")
     plt.tight_layout(); plt.savefig(FIG / "roi_check.png", dpi=120); plt.close()
-    print("\nSaved nav_metrics.txt, car_as_road.png, roi_check.png in results/")
+    print(f"\nSaved {run_dir / 'nav_metrics.txt'}, car_as_road_{NAME}.png and roi_check.png")
 
 
 if __name__ == "__main__":
