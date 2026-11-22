@@ -183,10 +183,11 @@ Pixel accuracy: 0.9615.
 
 ## 9. Files
 
-- Code (`src/`): `dataset.py`, `model.py`, `train.py`, `eval_run.py`, `evaluate.py`, `nav_metrics.py`, `measure.py`, `make_figures.py`
+- Code (`src/`): `dataset.py`, `model.py`, `train.py`, `eval_run.py`, `evaluate.py`, `nav_metrics.py`, `measure.py`, `make_figures.py`, `demo.py`
 - Per-run outputs (`results/runs/<name>/`): `log.csv`, `config.json`, `summary.txt`, `test_per_class.txt`
 - Summary tables: `results/ablation.csv`, `results/efficiency.csv`
 - Figures: `results/figures/` and `results/figures/paper/` (PNG and PDF)
+- Demo video: `results/demo/demo.mp4` and `demo_snapshot.png` (made with `src/demo.py`)
 - Model weights are not in the repository (`checkpoints/` is excluded by `.gitignore`).
 
 ---
@@ -340,4 +341,4 @@ All three run above 30 FPS at this resolution. The five repeats differed by less
 
 ### 11.6 Open items
 
-- Demo video.
+None. The demo video is described in the README.

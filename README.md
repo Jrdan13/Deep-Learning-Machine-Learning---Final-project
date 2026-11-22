@@ -50,13 +50,19 @@ Qualitative examples from the first baseline model (columns: image, ground truth
 
 ![Test predictions](camvid-segmentation/results/figures/test_predictions.png)
 
+## Demo video
+
+![Demo frame: original image and the navigation maps of U-Net, FCN-8s and DeepLabV3+](camvid-segmentation/results/demo/demo_snapshot.png)
+
+A short street-video demo runs the three trained models side by side and overlays the navigation map (green = drivable, red = obstacle, gray = other). Open [`demo.mp4`](camvid-segmentation/results/demo/demo.mp4) on GitHub to play it. The speed shown for each model in the video is the model forward pass only. The models were trained on CamVid only (Cambridge, 2008, daytime), so on footage from other cameras, countries or lighting the results are noticeably worse. The input clip is not part of this repository.
+
 ## Repository layout
 
 ```
 camvid-segmentation/
   src/         dataset.py, model.py, train.py, eval_run.py, evaluate.py,
-               nav_metrics.py, measure.py, make_figures.py
-  results/     ablation.csv, efficiency.csv, runs/<name>/ (logs and metrics), figures/
+               nav_metrics.py, measure.py, make_figures.py, demo.py
+  results/     ablation.csv, efficiency.csv, runs/<name>/ (logs and metrics), figures/, demo/
   README.md    method, evaluation protocol, how to reproduce
   RESULTS.md   complete record of every run
   requirements.txt

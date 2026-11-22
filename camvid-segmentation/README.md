@@ -88,6 +88,15 @@ python src\measure.py                   # parameters, GFLOPs, FPS -> results/eff
 python src\make_figures.py              # curves, bar charts, flow chart -> results/figures/paper/
 ```
 
+Demo video (models are loaded from `checkpoints/`; the default is the best-validation checkpoint of each architecture):
+
+```
+python src\demo.py --camvid --start 0 --count 80          # CamVid test frames next to the ground truth
+python src\demo.py --video clip.mp4 --max-seconds 30      # 2x2 grid: original, U-Net, FCN-8s, DeepLabV3+
+```
+
+The output goes to `results/demo/demo.mp4` and `demo_snapshot.png`. `--smooth 0.5` averages class probabilities over time to reduce flicker (demo only, not part of the evaluated models, and stated in the video). The speed shown in the video is the model forward pass only.
+
 Results are close to, but not bit-for-bit identical across machines (cuDNN autotuning, GPU type).
 
 ## 6. Notes and limitations
