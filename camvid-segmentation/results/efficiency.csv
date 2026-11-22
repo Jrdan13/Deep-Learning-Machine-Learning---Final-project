@@ -1,4 +1,4 @@
 arch,params_M,GFLOPs,fps_batch1,fps_max,peak_mem_MB
-unet,24.44,44.5,6.4,6.4,167
-fcn,21.29,26.9,11.3,11.3,128
-deeplabv3plus,22.44,44.4,6.0,6.0,163
+unet,24.44,44.5,45.5,45.6,167
+fcn,21.29,26.9,77.8,78.0,128
+deeplabv3plus,22.44,44.4,46.8,47.1,163

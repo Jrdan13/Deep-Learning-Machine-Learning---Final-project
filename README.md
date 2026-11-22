@@ -8,11 +8,13 @@ Pixel-level segmentation of street scenes to separate **drivable road** from **o
 
 Test set (233 images), mean of two seeds (0 and 1). All models use the same recipe: strong augmentation, cross-entropy + Dice loss, 40 epochs.
 
-| Model | Test mIoU | Test Dice | Road IoU | Obstacle called drivable (ROI) | Car called road | Params | GFLOPs | Speed vs U-Net |
+| Model | Test mIoU | Test Dice | Road IoU | Obstacle called drivable (ROI) | Car called road | Params | GFLOPs | FPS |
 |---|---|---|---|---|---|---|---|---|
-| **U-Net** | **0.669** | **0.779** | **0.950** | **4.17%** | **3.27%** | 24.4M | 44.5 | 1.00x |
-| FCN-8s | 0.650 | 0.763 | 0.939 | 5.27% | 4.09% | 21.3M | 26.9 | 1.75x |
-| DeepLabV3+ | 0.645 | 0.757 | 0.943 | 5.05% | 4.00% | 22.4M | 44.4 | 0.94x |
+| **U-Net** | **0.669** | **0.779** | **0.950** | **4.17%** | **3.27%** | 24.4M | 44.5 | 45.5 |
+| FCN-8s | 0.650 | 0.763 | 0.939 | 5.27% | 4.09% | 21.3M | 26.9 | 77.8 |
+| DeepLabV3+ | 0.645 | 0.757 | 0.943 | 5.05% | 4.00% | 22.4M | 44.4 | 46.8 |
+
+FPS: input 384 x 480, batch size 1, fp32, model forward pass only, NVIDIA T1200 Laptop GPU (4 GB), median of 5 repeats.
 
 Ablation on the U-Net (two-seed means):
 
@@ -29,7 +31,7 @@ Ablation on the U-Net (two-seed means):
 
 - **Adding the Dice term to cross-entropy is the main improvement** (+1.6 test mIoU points without augmentation, +3.2 with it). It held in both seeds and on validation.
 - **Strong augmentation alone lowered mIoU** (-1.2 points), mostly on thin classes (Pole, Fence). Together with Dice its extra effect (+0.5 points) is smaller than the seed-to-seed spread, so it is not established. It did reduce obstacle-called-drivable and car-called-road errors when used with plain cross-entropy.
-- **U-Net is the most accurate of the three architectures** on test and on every navigation measure. DeepLabV3+ needs the same compute and is slightly slower, so it offers no advantage here. FCN-8s is about 1.75 times faster with 40% fewer GFLOPs, at a cost of about 1.9 mIoU points.
+- **U-Net is the most accurate of the three architectures** on test and on every navigation measure. DeepLabV3+ needs the same compute and runs at about the same speed, so it offers no advantage here. FCN-8s is about 1.7 times faster (78 vs 46 FPS) with 40% fewer GFLOPs, at a cost of about 1.9 mIoU points. All three run above 30 FPS on the laptop GPU.
 - **Thin and small classes remain hard** for every model: Pole stays at 0.21 to 0.29 IoU and Fence at 0.29 to 0.39.
 - Large classes are reliable: Road IoU is about 0.95 and the 3-group (drivable / obstacle / other) mIoU is about 0.92 for the first baseline model.
 
@@ -41,6 +43,8 @@ Ablation on the U-Net (two-seed means):
 | ![Validation curves, ablation](camvid-segmentation/results/figures/paper/fig_val_curves_ablation.png) | ![Test metrics, ablation](camvid-segmentation/results/figures/paper/fig_bars_ablation.png) |
 
 ![Per-class test IoU, architectures](camvid-segmentation/results/figures/paper/fig_perclass_models.png)
+
+![Accuracy vs speed](camvid-segmentation/results/figures/paper/fig_speed_accuracy.png)
 
 Qualitative examples from the first baseline model (columns: image, ground truth, prediction, navigation map with green = drivable, red = obstacle, gray = other):
 
@@ -77,7 +81,7 @@ Data download, training, evaluation and figure commands are in [`camvid-segmenta
 - Two seeds per setting; differences below about 1 mIoU point are not reliable. The validation set has 101 images and the test frames come from a few video sequences, so neighboring frames repeat the same mistakes.
 - One shared training recipe was used, chosen from the U-Net ablation. FCN-8s and DeepLabV3+ might do better with their own settings.
 - The driving corridor (ROI) is hand-chosen. The ROI pavement-to-road rate varied a lot between seeds and is not used for conclusions.
-- Absolute inference speed was measured on a laptop GPU that was power-limited at the time, so only relative speeds and GFLOPs are reported (details in `camvid-segmentation/RESULTS.md`, section 11.3).
+- Speed was measured on one laptop GPU in fp32 with the model forward pass only (no image loading or post-processing); other hardware gives different absolute numbers. An earlier measurement was invalid because the laptop GPU was power-limited; this is documented in `camvid-segmentation/RESULTS.md`, section 11.3.
 
 ## Data and references
 

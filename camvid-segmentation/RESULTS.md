@@ -311,22 +311,24 @@ Fence IoU on validation vs test (seed 0 / seed 1): U-Net 0.690 / 0.694 vs 0.388 
 
 ### 11.3 Efficiency
 
-Parameters, GFLOPs and peak memory (identical in both measurement runs; input 1x3x384x480, GFLOPs counted with torch FlopCounterMode, a multiply-add counts as 2 FLOPs):
+Input 1x3x384x480, batch size 1, fp32, model forward pass only, NVIDIA T1200 Laptop GPU. GFLOPs counted with torch FlopCounterMode (a multiply-add counts as 2 FLOPs). FPS is the median of 5 timed repeats of 100 iterations (2026-11-21 23:20, GPU clock about 1800 MHz, power cap 40 W).
 
-| model | parameters (M) | GFLOPs | peak memory (MB) | speed relative to U-Net |
-|---|---|---|---|---|
-| U-Net | 24.44 | 44.5 | 165 | 1.00 |
-| FCN-8s | 21.29 | 26.9 | 128 | 1.75 |
-| DeepLabV3+ | 22.44 | 44.4 | 162 | 0.94 |
+| model | parameters (M) | GFLOPs | peak memory (MB) | FPS | speed relative to U-Net |
+|---|---|---|---|---|---|
+| U-Net | 24.44 | 44.5 | 167 | 45.5 | 1.00 |
+| FCN-8s | 21.29 | 26.9 | 128 | 77.8 | 1.71 |
+| DeepLabV3+ | 22.44 | 44.4 | 163 | 46.8 | 1.03 |
 
-**Absolute FPS was measured while the GPU was power-limited and is not reported as a result.** Three measurement runs on the same laptop gave different answers: 2026-11-20 (U-Net and FCN only) 45.5 and 79.6 FPS; 2026-11-21 after the DeepLabV3+ training 6.3 (U-Net), 11.1 (FCN) and 5.9 (DeepLabV3+) FPS; and 2026-11-21 16:08 with the updated `measure.py` 6.4, 11.3 and 6.0 FPS, stable across 5 repeats. During the last run `nvidia-smi` showed the GPU streaming-multiprocessor clock at 300 MHz (maximum 2100 MHz) at 100% utilization, with the power cap reading 15 W, against 30 W at the start of the project. The clock ratio (2100 / 300 = 7) matches the roughly 7-fold slowdown, and the ratios between the models were the same in every run (FCN 1.75 times and DeepLabV3+ 0.94 times the speed of U-Net). The slowdown is therefore a laptop power or clock limit, not a property of the models. GFLOPs and relative speeds are reported; absolute FPS has to be re-measured with the GPU at normal clocks before it is quoted. `results/efficiency.csv` currently holds the throttled values.
+All three run above 30 FPS at this resolution. The five repeats differed by less than 1% (U-Net 45.3 to 45.6, FCN 77.3 to 78.0, DeepLabV3+ 46.7 to 47.1).
+
+**Measurement history.** An earlier measurement (2026-11-20, U-Net and FCN only) gave 45.5 and 79.6 FPS, consistent with the table. Two later runs on 2026-11-21 gave 6.3 / 11.1 / 5.9 and 6.4 / 11.3 / 6.0 FPS (U-Net / FCN / DeepLabV3+). During the second of them `nvidia-smi` showed the GPU clock at 300 MHz (maximum 2100 MHz) at 100% utilization and a power cap of 15 W: the laptop was power-limited (charger or power profile), and the 7-fold slowdown matches the clock ratio. After the power state was fixed the clock was about 1800 MHz. Those two runs are therefore not valid speed results. DeepLabV3+ looked slower than U-Net (0.94x) in the throttled state but is slightly faster in the normal state (1.03x), so relative speeds must only be taken from the normal state.
 
 ### 11.4 Findings
 
 1. **U-Net is the most accurate on test** (0.669 vs FCN 0.650 vs DeepLabV3+ 0.645) and is best on all navigation measures: road IoU 0.950 vs 0.939 / 0.943, obstacle-to-drivable in the ROI 4.17% vs 5.27% / 5.05%, car-to-road 3.27% vs 4.09% / 4.00%. Test seed ranges do not overlap between U-Net and the other two.
 2. **FCN and DeepLabV3+ are close on test** (difference 0.6 points, inside the noise) but they rank differently on validation: DeepLabV3+ (0.752) matches U-Net (0.755) and beats FCN (0.730) by 2.2 points on validation, then drops to last place on test. Its validation-to-test drop (-10.7 points) is the largest, and Fence explains much of it (0.69 on validation, 0.29 on test).
 3. **Per class:** DeepLabV3+ is better than FCN on Pole (+5.1 points) but worse on Fence (-9.8) and Bicyclist (-4.0); against U-Net it is lower on Fence (-8.0), Bicyclist (-4.4), Pedestrian (-2.5), Pavement and Car (-2.4), Pole (-2.3). Poles stay at 0.21 to 0.29 for every architecture.
-4. **Cost:** DeepLabV3+ needs the same compute as U-Net (44.4 vs 44.5 GFLOPs) and runs at about 0.94 of its speed, so U-Net gives better accuracy at no extra cost. FCN uses 40% less compute and is about 1.75 times faster, so it is the speed option, at a cost of about 1.9 mIoU points against U-Net.
+4. **Cost:** DeepLabV3+ needs the same compute as U-Net (44.4 vs 44.5 GFLOPs) and runs at about the same speed (46.8 vs 45.5 FPS), so U-Net gives better accuracy at no extra cost. FCN uses 40% less compute and is about 1.7 times faster (77.8 FPS), so it is the speed option, at a cost of about 1.9 mIoU points against U-Net. All three exceed 30 FPS on this laptop GPU.
 5. The pavement-to-road numbers (U-Net 6.99%, DeepLabV3+ 9.96%, FCN 11.47%) point the same way but this metric varied widely across seeds in the ablation and should not be relied on.
 
 ### 11.5 Caveats
@@ -334,9 +336,8 @@ Parameters, GFLOPs and peak memory (identical in both measurement runs; input 1x
 - One shared recipe was used for all architectures. It was chosen from the U-Net ablation, so FCN and DeepLabV3+ might prefer different settings (learning rates, weights, augmentation).
 - DeepLabV3+ seed 0 reached its best validation mIoU at the last epoch (40), so it may still be improving at the 40-epoch budget. It used the library defaults.
 - Two seeds per model is too few for significance tests. Validation has 101 images and test frames come from a few sequences, so differences below about 1 point are unreliable, and the disagreement between validation and test for DeepLabV3+ shows how much the ranking can move.
-- Absolute FPS is pending (see 11.3).
+- Speed was measured on one laptop GPU in fp32 with the model forward pass only (no image loading or post-processing); other hardware will give different absolute numbers.
 
 ### 11.6 Open items
 
-- Re-measure absolute FPS with the GPU at normal clocks (`src/measure.py`), then regenerate `fig_speed_accuracy`.
 - Demo video.

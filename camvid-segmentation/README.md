@@ -36,7 +36,7 @@ To add a model, add a branch in `build_model()` in `src/model.py` and its name t
   - **ROI**: a trapezoid in front of the vehicle (bottom corners at 5% and 95% of the image width on the bottom row, top corners at 38% and 62% of the width at half the image height). Inside it we report the share of obstacle pixels predicted as drivable.
   - **Car called road**: share of Car pixels predicted as Road (whole image).
   - **Pavement called road** inside the ROI (high seed-to-seed variance, not used for conclusions).
-- Efficiency: parameters, GFLOPs (a multiply-add counts as 2 FLOPs) and peak GPU memory at input 1 x 3 x 384 x 480. Absolute FPS depends strongly on the laptop GPU's power state; see RESULTS.md section 11.3.
+- Efficiency: parameters, GFLOPs (a multiply-add counts as 2 FLOPs), peak GPU memory and inference speed at input 1 x 3 x 384 x 480, batch size 1, fp32, model forward pass only (median of 5 timed repeats of 100 iterations). Speed depends strongly on the laptop GPU's power state; `measure.py` prints the GPU clock and power so a throttled GPU is visible (see RESULTS.md section 11.3).
 
 ## 5. How to reproduce (Windows PowerShell, from this folder)
 
